@@ -44,7 +44,7 @@ TraceGuard is an offline-capable payment-dispute investigation service for e-com
 - Lint: `uv run ruff check .` (verified)
 - Type check: `uv run mypy src tests` (verified)
 - Security audit: `uv run pip-audit` (verified)
-- CLI example: `uv run python run.py --events data/events.jsonl --tenant T1 --order O-201 --question "Was this order paid?"` (unverified)
+- CLI example: pending M5, when `run.py` and `data/events.jsonl` are added; command: `uv run python run.py --events data/events.jsonl --tenant T1 --order O-201 --question "Was this order paid?"`
 
 ## Module map
 ```
@@ -97,7 +97,7 @@ tests/
 | M9 | P2 optional extras (skipped by D2) | PRD 8, 10 (D2, D3); Architecture 16 | Document omission in README |
 
 ## Progress tracker
-- [x] M1: Ingest & validation
+- [x] M1: Ingest & validation (including configurable event-count and note-length caps)
 - [x] M2: Core reconcile & golden tests
 - [ ] M3: Notes isolation & evidence verifier
 - [ ] M4: Tools & resilience
@@ -106,9 +106,9 @@ tests/
 - [ ] M7: LLM mock & local tracer
 - [ ] M8: Quality gates
 - [ ] M9: P2 review (skipped per D2)
-- Current milestone: M2 (complete, awaiting M3 go-ahead).
-- Last session: 2026-11-07, Milestone M2 completed (index, integrity engine, 8-step reconciler, confidence, golden cases O-201 to O-221, Hypothesis properties). Tests: 61 passing (98% coverage). Quality gates clean (ruff, mypy, pip-audit).
-- Next action: Await user command "start M3" to implement M3 (notes isolation, injection detector, evidence verifier).
+- Current milestone: M3 (pre-existing uncommitted implementation/tests are present but not reviewed in this session; M1 and M2 are complete).
+- Last session: 2026-11-07, completed M1 input-cap gap: configurable event limit and note text truncation, with conservative defaults recorded in `docs/OPEN_QUESTIONS.md`. Full suite: 71 passing; `ruff` and `mypy` clean.
+- Next action: After the user says "start M3", review and complete the pre-existing M3 working-tree changes (notes isolation and evidence verifier).
 - Decisions made and open questions: see `docs/DEV_LOG.md` and `docs/OPEN_QUESTIONS.md`.
 
 ## Working rules

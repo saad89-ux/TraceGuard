@@ -19,6 +19,8 @@ from traceguard.models import (
 )
 
 MAX_LINE_LENGTH = 64 * 1024  # 64 KB cap (Architecture Sec. 5 S2)
+MAX_EVENTS_PER_FILE = 100_000  # Conservative default; callers may lower or raise it.
+MAX_NOTE_LENGTH = 10_000  # Characters retained from an untrusted note.
 CURRENCY_REGEX = re.compile(r"^[A-Z]{3}$")
 
 REQUIRED_BASE_FIELDS = (
@@ -69,8 +71,20 @@ def _is_strict_int(val: Any) -> TypeGuard[int]:
     return isinstance(val, int)
 
 
-def parse_line(line: str, line_number: int) -> Event | QuarantinedRecord:
+def parse_line(
+    line: str,
+    line_number: int,
+    *,
+    max_note_length: int = MAX_NOTE_LENGTH,
+) -> Event | QuarantinedRecord:
     """Validate one JSONL line according to the 8 ordered checks in DataFlow Section 5."""
+    if (
+        isinstance(max_note_length, bool)
+        or not isinstance(max_note_length, int)
+        or max_note_length < 0
+    ):
+        raise ValueError("max_note_length must be a non-negative integer")
+
     # Check S2: line length cap
     if len(line.encode("utf-8")) > MAX_LINE_LENGTH:
         return QuarantinedRecord(
@@ -178,6 +192,10 @@ def parse_line(line: str, line_number: int) -> Event | QuarantinedRecord:
         capture_id = None
         refund_id = None
 
+    note_text = raw_obj.get("text") if isinstance(raw_obj.get("text"), str) else None
+    if event_type == EventType.NOTE and note_text is not None:
+        note_text = note_text[:max_note_length]
+
     return Event(
         tenant_id=raw_obj["tenant_id"].strip(),
         order_id=raw_obj["order_id"].strip(),
@@ -191,17 +209,32 @@ def parse_line(line: str, line_number: int) -> Event | QuarantinedRecord:
         refund_id=refund_id if isinstance(refund_id, str) else None,
         amount_cents=amount_cents if isinstance(amount_cents, int) else None,
         currency=currency if isinstance(currency, str) else None,
-        text=raw_obj.get("text") if isinstance(raw_obj.get("text"), str) else None,
+        text=note_text,
     )
 
 
-def ingest_events(path: Path | str) -> IngestResult:
+def ingest_events(
+    path: Path | str,
+    *,
+    max_events: int = MAX_EVENTS_PER_FILE,
+    max_note_length: int = MAX_NOTE_LENGTH,
+) -> IngestResult:
     """Stream JSONL file line-by-line, validating each line (never crashes).
 
     Blank lines are skipped silently.
     """
+    if isinstance(max_events, bool) or not isinstance(max_events, int) or max_events < 1:
+        raise ValueError("max_events must be a positive integer")
+    if (
+        isinstance(max_note_length, bool)
+        or not isinstance(max_note_length, int)
+        or max_note_length < 0
+    ):
+        raise ValueError("max_note_length must be a non-negative integer")
+
     valid_events: list[Event] = []
     quarantined: list[QuarantinedRecord] = []
+    record_count = 0
 
     file_path = Path(path)
     if not file_path.is_file():
@@ -212,7 +245,16 @@ def ingest_events(path: Path | str) -> IngestResult:
             stripped = line.strip()
             if not stripped:
                 continue  # Blank lines skipped silently (Doc 1 Sec 3.1)
-            record = parse_line(line, line_number=line_num)
+            if record_count >= max_events:
+                raise ValueError(
+                    f"Events file exceeds maximum event count of {max_events}"
+                )
+            record_count += 1
+            record = parse_line(
+                line,
+                line_number=line_num,
+                max_note_length=max_note_length,
+            )
             if isinstance(record, Event):
                 valid_events.append(record)
             else:

@@ -312,3 +312,34 @@ def test_ingest_events_streaming(tmp_path: Path) -> None:
     assert result.valid_events[0].type == EventType.ORDER_CREATED
     assert result.valid_events[1].type == EventType.PAYMENT_CAPTURED
     assert result.valid_events[1].amount_cents == 12900
+
+
+def test_ingest_enforces_configurable_maximum_event_count(tmp_path: Path) -> None:
+    file_path = tmp_path / "events.jsonl"
+    file_path.write_text(
+        f"{_valid_order_line()}\n{_valid_capture_line()}",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="maximum event count"):
+        ingest_events(file_path, max_events=1)
+
+
+def test_ingest_caps_note_text_at_configured_length(tmp_path: Path) -> None:
+    file_path = tmp_path / "events.jsonl"
+    note = {
+        "tenant_id": "T1",
+        "order_id": "O-201",
+        "event_id": "note-1",
+        "source": "support",
+        "type": "NOTE",
+        "occurred_at": "2026-11-01T10:00:00Z",
+        "ingested_at": "2026-11-01T10:00:05Z",
+        "text": "x" * 20,
+    }
+    file_path.write_text(json.dumps(note), encoding="utf-8")
+
+    result = ingest_events(file_path, max_note_length=8)
+
+    assert len(result.valid_events) == 1
+    assert result.valid_events[0].text == "x" * 8

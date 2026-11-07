@@ -4,8 +4,8 @@ Log of ambiguities found in the specifications or during development, along with
 
 | Date | Question | Where in spec | Conservative choice made |
 |---|---|---|---|
-| _YYYY-MM-DD_ | _unclear requirement_ | _doc & section_ | _chosen conservative behavior_ |
+| 2026-11-07 | What thresholds and overflow behavior should apply to the event-count and note-length caps? | Architecture Section 5, S2 | Use configurable limits: 100,000 nonblank records by default (reject the whole file with a controlled `ValueError` when exceeded) and 10,000 characters per note by default (truncate longer note text). Callers may override the limits. |
 
 ## Questions & Resolutions
 
-*(No open questions at scaffolding phase; specs are aligned and all decisions D1-D3, A13-A17 are recorded)*
+No additional open questions are recorded.
