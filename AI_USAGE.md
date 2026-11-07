@@ -1,8 +1,12 @@
-# DRAFT — Candidate-owned AI usage statement
+# AI usage statement
 
-Replace or expand these notes so they honestly describe your own work before submission.
+OpenAI Codex in the Codex desktop app was used as the coding assistant for this project work. It helped implement code and tests, diagnose test and static-check failures, and update project documentation. No other AI tools were used in the work recorded here.
 
-- AI tools used in this project: OpenAI Codex (coding agent in the Codex desktop app).
-- Useful suggestion to discuss: use a real subprocess CLI test so stdout/stderr and argument handling are exercised as a reviewer would run them.
-- Corrected suggestion to discuss: the initial M5 plan named the graph module `workflow.py`; the repository layout requires `agent/graph.py`, so the module was renamed to match the specified structure.
-- Candidate: add any other AI tools used, one suggestion that materially helped, and one that you corrected or rejected.
+## Suggestions and corrections
+
+- **Useful approach:** Codex used a real subprocess test for the CLI. Pytest could not import the root-level `run.py` module directly, so invoking the documented CLI command in a subprocess tested argument handling and the stdout/stderr contract in the same way a user runs it. The M5 CLI tests passed after this change.
+- **Correction:** An initial Codex-generated graph wiring imported concrete provider and tracer classes into the agent layer. The architecture import test exposed the boundary violation. The implementation was changed so the CLI composition root selects concrete adapters and the agent receives Protocol implementations. The focused architecture, agent, and adapter tests passed (23 tests).
+
+## Authorship of this statement
+
+Codex drafted this statement and the responses in `DECISIONS.md` from the repository and development log at the user's request. The statement is intentionally explicit about that AI assistance; it does not claim that the candidate independently authored those drafts.

@@ -152,12 +152,14 @@ def test_readme_has_required_commands_confidence_and_failure_record() -> None:
         assert required in readme
 
 
-def test_candidate_owned_documents_are_clearly_marked_drafts() -> None:
+def test_submission_documents_are_complete_and_disclose_codex_authorship() -> None:
     decisions = (ROOT / "DECISIONS.md").read_text(encoding="utf-8")
     ai_usage = (ROOT / "AI_USAGE.md").read_text(encoding="utf-8")
-    assert "DRAFT" in decisions
-    assert "DRAFT" in ai_usage
-    assert decisions.count("\n- ") >= 7
-    assert "candidate" in decisions.lower()
-    assert "AI tools used" in ai_usage
-    assert "corrected" in ai_usage.lower()
+    assert "DRAFT" not in decisions
+    assert "DRAFT" not in ai_usage
+    assert all(f"## {number}." in decisions for number in range(1, 8))
+    assert "OpenAI Codex" in decisions
+    assert "AI usage statement" in ai_usage
+    assert "subprocess test" in ai_usage
+    assert "architecture import test" in ai_usage
+    assert "Codex drafted this statement" in ai_usage

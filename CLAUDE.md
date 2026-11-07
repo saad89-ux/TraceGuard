@@ -107,8 +107,8 @@ tests/
 - [x] M8: Quality gates (Ruff, mypy, pytest-cov, pip-audit)
 - [x] M9: P2 review (skipped per D2; omission documented in README)
 - Current milestone: M1-M9 complete.
-- Last session: 2026-11-07, completed M9 by reviewing D2/D3 and documenting all omitted P2 items (LiteLLM, LangSmith, session memory, and `scripts/trace_summary.py`) in the README. Added an acceptance assertion; full suite: 136 passed, with 13 third-party LangSmith deprecation warnings. Ruff and mypy clean; pip-audit found no known vulnerabilities and skipped the local `traceguard==0.1.0` package because it is not on PyPI.
-- Next action: Candidate reviews and explains the draft `DECISIONS.md` and `AI_USAGE.md`, then completes the submission.
+- Last session: 2026-11-07, completed the project documentation at the user's explicit request. Replaced the candidate prompts with seven evidence-based decision responses and a candid AI usage statement disclosing Codex's implementation, testing, and drafting role. Updated the documentation acceptance test; full suite passed (136 tests, 94% coverage), Ruff and mypy were clean, and pip-audit found no known vulnerabilities (local package skipped because it is not on PyPI). Pytest reports 13 third-party LangSmith deprecation warnings. M9 remains complete: all P2 omissions are listed in README.
+- Next action: Submit the completed project using the assessment's submission channel.
 - Decisions made and open questions: see `docs/DEV_LOG.md` and `docs/OPEN_QUESTIONS.md`.
 
 ## Working rules
@@ -118,7 +118,7 @@ tests/
 - Honest logging: every failing test, root cause, fix, and wrong AI suggestion goes into `docs/DEV_LOG.md` immediately. Never invent entries.
 - Ambiguity: do not guess. Choose most conservative option + record in `docs/OPEN_QUESTIONS.md`.
 - No extra dependencies beyond Architecture Sec. 2. No `litellm`. No network in runtime or tests. No credentials anywhere; `.env` git-ignored.
-- Never write final text for `DECISIONS.md` or `AI_USAGE.md`. Leave only clearly marked DRAFT files with bullet notes for candidate.
+- `DECISIONS.md` and `AI_USAGE.md` were finalized at the user's explicit direction and disclose Codex authorship; preserve that disclosure in future edits.
 - Keep modules small, clean, and readable for live review explanation.
 
 ## Definition of done
