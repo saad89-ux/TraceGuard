@@ -135,6 +135,14 @@ def test_check_5_invalid_occurred_at() -> None:
     assert res.reason_code == "INVALID_TIMESTAMP"
 
 
+def test_check_5_occurred_at_requires_timezone() -> None:
+    data = json.loads(_valid_capture_line())
+    data["occurred_at"] = "2026-11-01T10:05:00"
+    res = parse_line(json.dumps(data), line_number=8)
+    assert isinstance(res, QuarantinedRecord)
+    assert res.reason_code == "INVALID_TIMESTAMP"
+
+
 def test_check_5_invalid_ingested_at() -> None:
     data = json.loads(_valid_capture_line())
     data["ingested_at"] = "2026-99-99T99:99:99"

@@ -97,7 +97,7 @@ tests/
 | M9 | P2 optional extras (skipped by D2) | PRD 8, 10 (D2, D3); Architecture 16 | Document omission in README |
 
 ## Progress tracker
-- [x] M1: Ingest & validation (including configurable event-count and note-length caps)
+- [x] M1: Ingest & validation (including configurable caps and timezone-required `occurred_at`)
 - [x] M2: Core reconcile & golden tests
 - [x] M3: Notes isolation & evidence verifier
 - [x] M4: Tools & resilience
@@ -106,9 +106,9 @@ tests/
 - [ ] M7: LLM mock & local tracer
 - [ ] M8: Quality gates
 - [ ] M9: P2 review (skipped per D2)
-- Current milestone: M7 (LLM protocols, mock provider, prompts, and local tracer).
-- Last session: 2026-11-07, completed the 147-valid-record Section 17 dataset, all golden scenarios, six noise lines, README A1-A17 assumption inventory, and clearly marked candidate drafts. User authorized DataFlow Section 15 and PRD Section 10 to complete the inventory. M6 dataset/docs tests: 27 passed; full suite: 121 passed; `ruff` and `mypy` clean. The suite reports 13 third-party LangSmith deprecation warnings.
-- Next action: Start M7 following its spec-section allowlist and test-first protocol.
+- Current milestone: M7 (LLM protocols, mock provider, prompts, and local tracer; awaiting user approval).
+- Last session: 2026-11-07, revalidated M1 and fixed ingestion accepting timezone-naive `occurred_at` values. Focused ingest tests: 38 passed; full suite: 122 passed; `ruff` and `mypy` clean. The suite reports 13 third-party LangSmith deprecation warnings.
+- Next action: Wait for the user's instruction before starting another milestone.
 - Decisions made and open questions: see `docs/DEV_LOG.md` and `docs/OPEN_QUESTIONS.md`.
 
 ## Working rules

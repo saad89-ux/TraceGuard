@@ -31,6 +31,7 @@ Honest running log of test failures, root causes, fixes, and corrected AI sugges
 | 2026-11-07 | M6 README inventory acceptance test failed on missing assumption A1 | README still contained the old incomplete-inventory notice because DataFlow Section 15 and PRD Section 10 had not yet been authorized | Replace the notice with a complete, explicit A1-A17 inventory after the user authorized those sections | `uv run pytest tests/test_dataset_m6.py -q` (27 passed) |
 | 2026-11-07 | The expanded M6 README acceptance test still failed after adding A1-A17 | The test's exact phrase for decision A16 was not present although its meaning was documented | Align the README wording with the explicit A16 decision while retaining its explanation | `uv run pytest tests/test_dataset_m6.py -q` (27 passed) |
 | 2026-11-07 | The README acceptance test found a final missing phrase for assumption A17 | The policy was present but the README omitted the word "Tier" used by the check | Use the explicit "Tier P2 is not built by default" wording in A17 | `uv run pytest tests/test_dataset_m6.py -q` (27 passed) |
+| 2026-11-07 | `test_check_5_occurred_at_requires_timezone` failed | `_is_valid_iso8601` accepted a timezone-naive `occurred_at` although DataFlow Section 3.2 requires a timezone or `Z` | Require an explicit UTC offset for `occurred_at`; continue validating `ingested_at` as ISO 8601 | `uv run pytest tests/test_core_ingest.py -q` (38 passed) |
 
 ## Log Entries
 

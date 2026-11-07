@@ -52,14 +52,14 @@ class IngestResult(BaseModel):
     quarantined: list[QuarantinedRecord]
 
 
-def _is_valid_iso8601(ts_str: str) -> bool:
-    """Validate ISO 8601 timestamp string."""
+def _is_valid_iso8601(ts_str: str, *, require_timezone: bool = False) -> bool:
+    """Validate an ISO 8601 timestamp, optionally requiring a timezone."""
     if not isinstance(ts_str, str) or not ts_str.strip():
         return False
     try:
         # Python 3.11+ supports 'Z' and timezone offsets natively
-        datetime.fromisoformat(ts_str)
-        return True
+        parsed = datetime.fromisoformat(ts_str)
+        return not require_timezone or parsed.utcoffset() is not None
     except (ValueError, TypeError):
         return False
 
@@ -146,7 +146,7 @@ def parse_line(
     event_source = EventSource(raw_source)
 
     # 5. occurred_at and ingested_at valid ISO 8601?
-    if not _is_valid_iso8601(raw_obj["occurred_at"]) or not _is_valid_iso8601(raw_obj["ingested_at"]):
+    if not _is_valid_iso8601(raw_obj["occurred_at"], require_timezone=True) or not _is_valid_iso8601(raw_obj["ingested_at"]):
         return _quarantine("INVALID_TIMESTAMP")
 
     # 6. Type-specific IDs present?
