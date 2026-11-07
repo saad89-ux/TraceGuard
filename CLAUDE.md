@@ -102,13 +102,13 @@ tests/
 - [x] M3: Notes isolation & evidence verifier
 - [x] M4: Tools & resilience
 - [x] M5: LangGraph & CLI
-- [ ] M6: Dataset & documentation scaffolding (assumption inventory pending scope resolution)
+- [x] M6: Dataset & documentation scaffolding (complete A1-A17 README inventory; candidate drafts retained)
 - [ ] M7: LLM mock & local tracer
 - [ ] M8: Quality gates
 - [ ] M9: P2 review (skipped per D2)
-- Current milestone: M6 (dataset and documentation drafts implemented; README assumption inventory remains incomplete).
-- Last session: 2026-11-07, built the 147-valid-record Section 17 dataset with all golden scenarios, six noise lines, README, and clearly marked candidate drafts. The M6 tests cover every Section 17 row and the documented CLI. Full suite: 121 passing; `ruff` and `mypy` clean. M6 is not checked off because PRD Section 9 requires assumptions from DataFlow Section 15 and PRD Section 10, which the user kept outside the M6 read allowlist.
-- Next action: Wait for an instruction that permits reading DataFlow Section 15 and PRD Section 10; then complete and verify the README assumption inventory before starting M7.
+- Current milestone: M7 (LLM protocols, mock provider, prompts, and local tracer).
+- Last session: 2026-11-07, completed the 147-valid-record Section 17 dataset, all golden scenarios, six noise lines, README A1-A17 assumption inventory, and clearly marked candidate drafts. User authorized DataFlow Section 15 and PRD Section 10 to complete the inventory. M6 dataset/docs tests: 27 passed; full suite: 121 passed; `ruff` and `mypy` clean. The suite reports 13 third-party LangSmith deprecation warnings.
+- Next action: Start M7 following its spec-section allowlist and test-first protocol.
 - Decisions made and open questions: see `docs/DEV_LOG.md` and `docs/OPEN_QUESTIONS.md`.
 
 ## Working rules

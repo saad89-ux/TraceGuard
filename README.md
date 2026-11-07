@@ -39,9 +39,29 @@ The deterministic core sets financial status and totals. Notes and question word
 
 ## Assumptions
 
-**Candidate completion required.** PRD Section 9 asks this README to enumerate assumptions A1–A12 from DataFlow Section 15 and A13–A17 from PRD Section 10. The M6 instruction allowlist permits DataFlow Section 17 and PRD Sections 9, 11, and 12, but excludes those two assumption sections; the user directed keeping that allowlist. This assumption inventory is **not complete**. Before submission, the candidate should review the cited sections, write each assumption here in their own words, and resolve the open note in `docs/OPEN_QUESTIONS.md`.
+The following implementation assumptions and gap resolutions define how TraceGuard interprets the brief:
 
-Other tracked implementation choices are recorded in `docs/OPEN_QUESTIONS.md`, including configurable ingest caps and the semicolon separator used when fault scripts name multiple tools.
+| ID | Assumption |
+|---|---|
+| A1 | `checkout` emits `ORDER_CREATED`, `payments` emits financial events, and `support` emits notes. |
+| A2 | Every valid `CHARGEBACK_OPENED` is considered open because no close event exists in the input. |
+| A3 | Duplicate comparison uses every field except `ingested_at`. |
+| A4 | Repeated `capture_id`s with identical transaction substance are one capture; any substance difference raises `TXN_ID_CONFLICT`. |
+| A5 | A verified payment failure is a valid `PAYMENT_FAILED` event from `payments`; checkout failures and note text do not count. |
+| A6 | `UNKNOWN` always has null totals, including when there are no captures or failure evidence, because incomplete history cannot prove that nothing was captured. |
+| A7 | Timestamps are validated but never determine ordering or results. |
+| A8 | Amounts must be integers (not booleans, floats, or strings); capture, refund, and expected amounts must be positive. |
+| A9 | A malformed line without a usable string `tenant_id` or `order_id` cannot be attributed and cannot affect a result; this risk is accepted and documented. |
+| A10 | An injection-suspected note caps confidence at `MEDIUM`. |
+| A11 | A capture and failure with the same `attempt_id` are contradictory and produce fatal `ATTEMPT_CONTRADICTION`. |
+| A12 | A refund or chargeback that references a capture belonging to another order in the same tenant is an invalid reference. |
+| A13 | When an attributable quarantined `payments` record raises a fatal anomaly, its reference uses its non-empty `event_id`, or `line-<N>` (the one-based input line number) if unavailable. Quarantined records never appear in `evidence_event_ids`. |
+| A14 | Optional `TRACEGUARD_FAULTS` scripts can demonstrate bounded retries (for example, `get_payment_events=fail,timeout,ok`). The setting is read only by config, does not change CLI options or stdout, and retry messages go to stderr. |
+| A15 | When distinct event IDs agree on capture substance, all of those IDs are cited as evidence; the amount is stated once. |
+| A16 | Notes are fetched for every intent, so the injection warning and `MEDIUM` confidence cap do not depend on question wording. |
+| A17 | Tier P2 is not built by default. If a provider switch is requested without a built provider, it falls back to the mock provider with a stderr warning. |
+
+These are candidate assumptions to review and explain in your own words before submission. Other tracked implementation choices are recorded in `docs/OPEN_QUESTIONS.md`, including configurable ingest caps and the semicolon separator used when fault scripts name multiple tools.
 
 ## Build status
 

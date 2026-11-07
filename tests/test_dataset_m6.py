@@ -138,9 +138,15 @@ def test_readme_has_required_commands_confidence_and_failure_record() -> None:
         "P1",
         "P2",
         "Assumptions",
-        "DataFlow Section 15",
-        "PRD Section 10",
-        "not complete",
+        "A1",
+        "A17",
+        "checkout",
+        "ingested_at",
+        "ATTEMPT_CONTRADICTION",
+        "line-<N>",
+        "TRACEGUARD_FAULTS",
+        "Notes are fetched for every intent",
+        "Tier P2 is not built by default",
     ):
         assert required in readme
 
