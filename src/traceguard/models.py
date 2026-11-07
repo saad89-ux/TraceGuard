@@ -3,7 +3,7 @@
 from enum import Enum
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class EventType(str, Enum):
@@ -147,3 +147,26 @@ class ReconResult(BaseModel):
     evidence_event_ids: list[str]
     confidence: ConfidenceLevel
     duplicate_count: int = 0
+
+
+class ToolMeta(BaseModel):
+    """Metadata describing a bounded tool invocation."""
+
+    model_config = ConfigDict(frozen=True)
+
+    attempts: int
+    latency_ms: float
+    outcome: str
+
+
+class ToolResponse(BaseModel):
+    """Records and attributable quarantine returned by a tool."""
+
+    model_config = ConfigDict(frozen=True)
+
+    records: list[Event]
+    quarantined: list[QuarantinedRecord]
+    meta: ToolMeta
+    anomalies: list[str] = Field(default_factory=list)
+    confidence_cap: ConfidenceLevel | None = None
+    unavailable: bool = False

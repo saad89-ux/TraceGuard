@@ -100,15 +100,15 @@ tests/
 - [x] M1: Ingest & validation (including configurable event-count and note-length caps)
 - [x] M2: Core reconcile & golden tests
 - [x] M3: Notes isolation & evidence verifier
-- [ ] M4: Tools & resilience
+- [x] M4: Tools & resilience
 - [ ] M5: LangGraph & CLI
 - [ ] M6: Dataset & documentation scaffolding
 - [ ] M7: LLM mock & local tracer
 - [ ] M8: Quality gates
 - [ ] M9: P2 review (skipped per D2)
-- Current milestone: M4 (not started; M1-M3 are complete, awaiting go-ahead).
-- Last session: 2026-11-07, completed M3 notes isolation and evidence verification. Added complete control-character sanitization, strict number and citation checks, injection warning verification, and safe anomaly wording. Full suite: 76 passing; `ruff` and `mypy` clean.
-- Next action: Await user command "start M4" to implement tools, resilience, and fault injection.
+- Current milestone: M5 (M1-M4 are complete).
+- Last session: 2026-11-07, completed M4 tenant-scoped tools, bounded retry/timeout handling, fallback metadata, and scripted fault injection with A14 environment parsing. Full suite: 84 passing; `ruff` and `mypy` clean.
+- Next action: Await user command "start M5" to implement intent, template explanation, graph, and CLI.
 - Decisions made and open questions: see `docs/DEV_LOG.md` and `docs/OPEN_QUESTIONS.md`.
 
 ## Working rules
