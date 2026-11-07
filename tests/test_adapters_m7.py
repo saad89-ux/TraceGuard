@@ -156,4 +156,4 @@ def test_readme_reports_p1_delivery_and_p2_omission() -> None:
         encoding="utf-8"
     )
     assert "P1: LLM provider, misbehaving mock, structured prompts, G5 validation, and local redacted tracing are implemented." in readme
-    assert "P2: LiteLLM, LangSmith, and session memory are omitted." in readme
+    assert "P2: LiteLLM, LangSmith, session memory, and `scripts/trace_summary.py` are omitted." in readme

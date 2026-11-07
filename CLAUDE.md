@@ -105,10 +105,10 @@ tests/
 - [x] M6: Dataset & documentation scaffolding (complete A1-A17 README inventory; candidate drafts retained)
 - [x] M7: LLM protocols, misbehaving mock, structured prompts, G5, local tracer, and import gate
 - [x] M8: Quality gates (Ruff, mypy, pytest-cov, pip-audit)
-- [ ] M9: P2 review (skipped per D2)
-- Current milestone: M9 (P2 review, skipped per D2).
-- Last session: 2026-11-07, completed M8 quality gates. `uv run ruff check .` and `uv run mypy src tests run.py` passed; `uv run pytest --cov=traceguard` passed 136 tests at 94% total coverage; `uv run pip-audit` found no known vulnerabilities and skipped the local `traceguard==0.1.0` package because it is not on PyPI. The test run reported 13 third-party LangSmith deprecation warnings.
-- Next action: Review M9's P2 omission against D2 and document that P2 remains intentionally skipped; do not add optional P2 packages.
+- [x] M9: P2 review (skipped per D2; omission documented in README)
+- Current milestone: M1-M9 complete.
+- Last session: 2026-11-07, completed M9 by reviewing D2/D3 and documenting all omitted P2 items (LiteLLM, LangSmith, session memory, and `scripts/trace_summary.py`) in the README. Added an acceptance assertion; full suite: 136 passed, with 13 third-party LangSmith deprecation warnings. Ruff and mypy clean; pip-audit found no known vulnerabilities and skipped the local `traceguard==0.1.0` package because it is not on PyPI.
+- Next action: Candidate reviews and explains the draft `DECISIONS.md` and `AI_USAGE.md`, then completes the submission.
 - Decisions made and open questions: see `docs/DEV_LOG.md` and `docs/OPEN_QUESTIONS.md`.
 
 ## Working rules

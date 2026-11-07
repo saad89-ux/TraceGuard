@@ -67,7 +67,7 @@ These are candidate assumptions to review and explain in your own words before s
 
 - P0: ingest and validation, deterministic reconciliation, notes isolation, tools and resilience, keyword intent, fixed workflow, offline CLI, and the Section 17 dataset are implemented.
 - P1: LLM provider, misbehaving mock, structured prompts, G5 validation, and local redacted tracing are implemented.
-- P2: LiteLLM, LangSmith, and session memory are omitted. Setting `TRACEGUARD_LLM_PROVIDER` to a non-mock value prints a controlled warning to stderr and falls back to the mock provider.
+- P2: LiteLLM, LangSmith, session memory, and `scripts/trace_summary.py` are omitted. Setting `TRACEGUARD_LLM_PROVIDER` to a non-mock value prints a controlled warning to stderr and falls back to the mock provider.
 
 ## Test record
 
