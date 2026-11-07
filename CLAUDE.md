@@ -38,12 +38,12 @@ TraceGuard is an offline-capable payment-dispute investigation service for e-com
 - Decisions: P2 is NOT built (D2); no `litellm` dependency (D3); notes fetched for every intent (D1). Assumptions A13-A17 are in PRD Sec. 10 and listed in README.
 
 ## Commands
-- Setup: `uv sync --extra dev` (unverified)
-- Run tests: `uv run pytest` (unverified)
-- Coverage: `uv run pytest --cov=traceguard` (unverified)
-- Lint: `uv run ruff check .` (unverified)
-- Type check: `uv run mypy src` (unverified)
-- Security audit: `uv run pip-audit` (unverified)
+- Setup: `uv sync --extra dev` (verified)
+- Run tests: `uv run pytest` (verified)
+- Coverage: `uv run pytest --cov=traceguard` (verified)
+- Lint: `uv run ruff check .` (verified)
+- Type check: `uv run mypy src tests` (verified)
+- Security audit: `uv run pip-audit` (verified)
 - CLI example: `uv run python run.py --events data/events.jsonl --tenant T1 --order O-201 --question "Was this order paid?"` (unverified)
 
 ## Module map
@@ -97,7 +97,7 @@ tests/
 | M9 | P2 optional extras (skipped by D2) | PRD 8, 10 (D2, D3); Architecture 16 | Document omission in README |
 
 ## Progress tracker
-- [ ] M1: Ingest & validation
+- [x] M1: Ingest & validation
 - [ ] M2: Core reconcile & golden tests
 - [ ] M3: Notes isolation & evidence verifier
 - [ ] M4: Tools & resilience
@@ -106,9 +106,9 @@ tests/
 - [ ] M7: LLM mock & local tracer
 - [ ] M8: Quality gates
 - [ ] M9: P2 review (skipped per D2)
-- Current milestone: none (specs read, awaiting go-ahead).
-- Last session: 2026-11-07, Phase 0-4 completed (specs audited, CLAUDE.md written, dev log scaffolding committed). Tests: 0 (code not started).
-- Next action: Await user command "start M1" to begin Milestone 1.
+- Current milestone: M1 (complete, awaiting M2 go-ahead).
+- Last session: 2026-11-07, Milestone M1 completed (models, ingest validation, 8 ordered checks, quarantine, attribution). Tests: 35 passing (93% coverage). Quality gates clean (ruff, mypy, pip-audit).
+- Next action: Await user command "start M2" to implement M2 (core index, integrity, reconcile, confidence, golden tests).
 - Decisions made and open questions: see `docs/DEV_LOG.md` and `docs/OPEN_QUESTIONS.md`.
 
 ## Working rules
