@@ -66,8 +66,8 @@ These are candidate assumptions to review and explain in your own words before s
 ## Build status
 
 - P0: ingest and validation, deterministic reconciliation, notes isolation, tools and resilience, keyword intent, fixed workflow, offline CLI, and the Section 17 dataset are implemented.
-- P1: LLM adapter, local tracer, and related gates are not part of this build yet.
-- P2: optional provider integrations and session memory are omitted.
+- P1: LLM provider, misbehaving mock, structured prompts, G5 validation, and local redacted tracing are implemented.
+- P2: LiteLLM, LangSmith, and session memory are omitted. Setting `TRACEGUARD_LLM_PROVIDER` to a non-mock value prints a controlled warning to stderr and falls back to the mock provider.
 
 ## Test record
 

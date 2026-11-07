@@ -5,8 +5,10 @@ import json
 import logging
 import sys
 from collections.abc import Sequence
+from uuid import uuid4
 
 from traceguard.agent.graph import run_investigation
+from traceguard.config import faults_from_environment, provider_from_environment, tracer_for_run
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -23,11 +25,16 @@ def main(argv: Sequence[str] | None = None) -> int:
     logging.basicConfig(stream=sys.stderr, level=logging.WARNING, format="%(message)s")
     args = _parser().parse_args(argv)
     try:
+        run_id = str(uuid4())
         output = run_investigation(
             args.events,
             args.tenant,
             args.order,
             args.question,
+            faults=faults_from_environment(),
+            provider=provider_from_environment(),
+            tracer=tracer_for_run(run_id),
+            run_id=run_id,
         )
     except (OSError, ValueError) as exc:
         print(f"TraceGuard: {exc}", file=sys.stderr)

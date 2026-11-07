@@ -1,15 +1,17 @@
 """Fixed LangGraph workflow for offline payment investigations."""
 
+import sys
 from collections.abc import Callable
 from typing import cast
 
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 
-from traceguard.agent.explain import explain_result
-from traceguard.agent.intent import Intent, classify_intent
+from traceguard.adapters.llm_base import LLMProvider
+from traceguard.adapters.tracing import Tracer
+from traceguard.agent.explain import explain_with_provider
+from traceguard.agent.intent import Intent, classify_intent_with_provider
 from traceguard.agent.state import GraphState
-from traceguard.config import faults_from_environment
 from traceguard.core.index import EventIndex
 from traceguard.core.notes import process_notes
 from traceguard.core.reconcile import reconcile_order
@@ -43,8 +45,8 @@ def _load(state: GraphState) -> GraphState:
     return {"index": index, "quarantined": quarantined}
 
 
-def _interpret(state: GraphState) -> GraphState:
-    return {"intent": classify_intent(state["question"])}
+def _interpret(state: GraphState, provider: LLMProvider) -> GraphState:
+    return {"intent": classify_intent_with_provider(state["question"], provider)}
 
 
 def _plan(state: GraphState) -> GraphState:
@@ -184,7 +186,7 @@ def _reconcile(state: GraphState) -> GraphState:
     return {"result": result, "notes_channel": notes_channel}
 
 
-def _explain(state: GraphState) -> GraphState:
+def _explain(state: GraphState, provider: LLMProvider) -> GraphState:
     result = state["result"]
     index = state["index"]
     relevant = index.get_order_events(state["tenant_id"], state["order_id"])
@@ -206,15 +208,20 @@ def _explain(state: GraphState) -> GraphState:
     currency = next(iter(currencies)) if len(currencies) == 1 else None
     if expected_amount is not None:
         allowed_numbers.add(expected_amount)
-    explanation = explain_result(
+    explanation, rejected = explain_with_provider(
         result,
         state["notes_channel"],
         event_ids=event_ids,
         allowed_numbers=allowed_numbers,
         expected_amount=expected_amount if result.status != OrderStatus.UNKNOWN else None,
         currency=currency,
+        provider=provider,
     )
-    return {"explanation": explanation}
+    if rejected:
+        result = result.model_copy(
+            update={"anomalies": sorted(set(result.anomalies + ["LLM_OUTPUT_REJECTED"]))}
+        )
+    return {"explanation": explanation, "result": result}
 
 
 def _verify_and_finalize(state: GraphState) -> GraphState:
@@ -233,18 +240,19 @@ def _verify_and_finalize(state: GraphState) -> GraphState:
 
 
 def build_graph(
+    provider: LLMProvider,
     faults: FaultInjector | None = None,
 ) -> CompiledStateGraph[GraphState, None, GraphState, GraphState]:
     """Compile the fixed, acyclic workflow (all intents fetch all three tools)."""
     graph = StateGraph(GraphState)
     graph.add_node("load_index", _load)
-    graph.add_node("interpret_intent", _interpret)
+    graph.add_node("interpret_intent", lambda state: _interpret(state, provider))
     graph.add_node("plan_tools", _plan)
     graph.add_node("fetch_order", lambda state: _fetch_order(state, faults))
     graph.add_node("fetch_payment_events", lambda state: _fetch_payments(state, faults))
     graph.add_node("fetch_notes", lambda state: _fetch_notes(state, faults))
     graph.add_node("validate_and_reconcile", _reconcile)
-    graph.add_node("explain", _explain)
+    graph.add_node("explain", lambda state: _explain(state, provider))
     graph.add_node("verify_output", _verify_and_finalize)
     graph.add_edge(START, "load_index")
     graph.add_edge("load_index", "interpret_intent")
@@ -264,18 +272,26 @@ def run_investigation(
     tenant_id: str,
     order_id: str,
     question: str,
+    *,
+    faults: FaultInjector | None,
+    provider: LLMProvider,
+    tracer: Tracer,
+    run_id: str,
 ) -> dict[str, object]:
     """Run the offline graph once and return the exact eight-field result object."""
-    graph = build_graph(faults_from_environment())
-    state = cast(
-        GraphState,
-        graph.invoke(
-            {
-                "events_path": str(events_path),
-                "tenant_id": tenant_id,
-                "order_id": order_id,
-                "question": question,
-            }
-        ),
-    )
+    print(f"run_id={run_id}", file=sys.stderr)
+    graph = build_graph(provider, faults)
+    with tracer.span("run_investigation", run_id=run_id, tenant_id=tenant_id, order_id=order_id):
+        state = cast(
+            GraphState,
+            graph.invoke(
+                {
+                    "events_path": str(events_path),
+                    "tenant_id": tenant_id,
+                    "order_id": order_id,
+                    "question": question,
+                }
+            ),
+        )
+    tracer.event("run_complete", status=state["output"]["status"])
     return state["output"]

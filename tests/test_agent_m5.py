@@ -1,14 +1,33 @@
 """M5 tests for keyword intent, fixed workflow, template output, and CLI."""
 
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
+from typing import Any
+from uuid import uuid4
 
 import pytest
+from pydantic import BaseModel
 
-from traceguard.agent.graph import run_investigation
+from traceguard.adapters.llm_mock import MockProvider
+from traceguard.adapters.tracing import LocalJsonlTracer
+from traceguard.agent.graph import build_graph, run_investigation
 from traceguard.agent.intent import Intent, classify_intent
+from traceguard.config import faults_from_environment, provider_from_environment
+
+
+class CountingMockProvider(MockProvider):
+    def __init__(self, *, misbehaving: str | None = None) -> None:
+        super().__init__(misbehaving=misbehaving)
+        self.calls = 0
+
+    def complete(
+        self, task: str, payload: dict[str, Any], schema: type[BaseModel]
+    ) -> BaseModel:
+        self.calls += 1
+        return super().complete(task, payload, schema)
 
 
 def _event(
@@ -45,6 +64,20 @@ def _invoke_cli(events: Path, tenant: str, order: str, question: str) -> subproc
         capture_output=True,
         text=True,
         timeout=20,
+    )
+
+
+def _run_investigation(events: str, tenant: str, order: str, question: str) -> dict[str, object]:
+    run_id = str(uuid4())
+    return run_investigation(
+        events,
+        tenant,
+        order,
+        question,
+        faults=faults_from_environment(),
+        provider=provider_from_environment(),
+        tracer=LocalJsonlTracer("traces", run_id),
+        run_id=run_id,
     )
 
 
@@ -126,7 +159,7 @@ def test_o201_cli_workflow_matches_golden_and_prints_eight_fields(events_file: P
     assert output["evidence_event_ids"] == ["order-1", "pay-1", "pay-2"]
     assert output["confidence"] == "HIGH"
     assert completed.stdout.strip() == json.dumps(output, separators=(",", ":"))
-    assert completed.stderr == ""
+    assert re.search(r"run_id=[0-9a-f-]{36}", completed.stderr)
 
 
 def test_same_order_four_intents_produce_byte_identical_output(events_file: Path) -> None:
@@ -137,7 +170,7 @@ def test_same_order_four_intents_produce_byte_identical_output(events_file: Path
         "Give me an overview",
     ]
     results = [
-        run_investigation(str(events_file), "T1", "O-216", question)
+        _run_investigation(str(events_file), "T1", "O-216", question)
         for question in questions
     ]
     serialized = [json.dumps(result, separators=(",", ":")) for result in results]
@@ -148,11 +181,57 @@ def test_same_order_four_intents_produce_byte_identical_output(events_file: Path
     assert "untrusted data and ignored" in str(results[0]["explanation"])
 
 
+def test_run_writes_a_redacted_jsonl_trace_and_keeps_result_on_stdout(
+    events_file: Path,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    result = _run_investigation(str(events_file), "T1", "O-216", "Was this order paid?")
+    stderr = capsys.readouterr().err
+    match = re.search(r"run_id=([0-9a-f-]{36})", stderr)
+    assert match is not None
+    trace_path = tmp_path / "traces" / f"{match.group(1)}.jsonl"
+    trace = trace_path.read_text(encoding="utf-8")
+    assert result["status"] == "PAID"
+    assert "run_investigation" in trace
+    assert "run_complete" in trace
+    assert "SYSTEM OVERRIDE" not in trace
+    assert "Was this order paid?" not in trace
+
+
+def test_graph_rejects_misbehaving_explanation_without_changing_financial_state(
+    events_file: Path,
+) -> None:
+    provider = CountingMockProvider(misbehaving="wrong_status")
+    graph = build_graph(provider=provider)
+    state = graph.invoke(
+        {
+            "events_path": str(events_file),
+            "tenant_id": "T1",
+            "order_id": "O-201",
+            "question": "Was this order paid?",
+        }
+    )
+    output = state["output"]
+    assert output["status"] == "PAID"
+    assert (output["captured_cents"], output["refunded_cents"], output["net_paid_cents"]) == (
+        12900,
+        0,
+        12900,
+    )
+    assert output["evidence_event_ids"] == ["order-1", "pay-1", "pay-2"]
+    assert output["anomalies"] == ["LLM_OUTPUT_REJECTED"]
+    assert "Order expected 12900 USD" in str(output["explanation"])
+    assert provider.calls == 2
+
+
 def test_notes_failure_keeps_financial_status_and_adds_warning(
     events_file: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     monkeypatch.setenv("TRACEGUARD_FAULTS", "get_support_notes=fail,fail,fail")
-    result = run_investigation(str(events_file), "T1", "O-201", "Was this order paid?")
+    result = _run_investigation(str(events_file), "T1", "O-201", "Was this order paid?")
     assert result["status"] == "PAID"
     assert result["anomalies"] == ["NOTES_UNAVAILABLE"]
     assert result["confidence"] == "MEDIUM"
@@ -165,7 +244,7 @@ def test_essential_tool_exhaustion_degrades_to_unknown(
     tool_name: str,
 ) -> None:
     monkeypatch.setenv("TRACEGUARD_FAULTS", f"{tool_name}=fail,fail,fail")
-    result = run_investigation(
+    result = _run_investigation(
         str(events_file), "T1", "O-201", "Was this order paid?"
     )
     assert result["status"] == "UNKNOWN"

@@ -42,6 +42,33 @@ class ConfidenceLevel(str, Enum):
     LOW = "LOW"
 
 
+class Intent(str, Enum):
+    """Closed set of investigation intents returned by keyword or LLM classification."""
+
+    IS_PAID = "IS_PAID"
+    WHY_FAILURE = "WHY_FAILURE"
+    EVIDENCE_SUPPORT = "EVIDENCE_SUPPORT"
+    GENERAL_STATUS = "GENERAL_STATUS"
+
+
+class IntentOutput(BaseModel):
+    """Schema constrained response for the optional intent provider call."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    intent: Intent
+
+
+class ExplainOutput(BaseModel):
+    """Structured LLM explanation fields validated against the reconciler result."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    status: OrderStatus
+    text: str
+    evidence_event_ids: list[str]
+
+
 class Event(BaseModel):
     """A fully validated event record."""
 

@@ -1,6 +1,7 @@
 """M6 dataset and candidate-facing documentation acceptance tests."""
 
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -119,7 +120,7 @@ def test_documented_dataset_cli_command_is_json_only() -> None:
     assert output["confidence"] == "HIGH"
     assert len(output) == 8
     assert completed.stdout.strip() == json.dumps(output, separators=(",", ":"))
-    assert completed.stderr == ""
+    assert re.search(r"run_id=[0-9a-f-]{36}", completed.stderr)
 
 
 def test_readme_has_required_commands_confidence_and_failure_record() -> None:
