@@ -44,7 +44,7 @@ TraceGuard is an offline-capable payment-dispute investigation service for e-com
 - Lint: `uv run ruff check .` (verified)
 - Type check: `uv run mypy src tests run.py` (verified)
 - Security audit: `uv run pip-audit` (verified)
-- CLI example: pending M6, when `data/events.jsonl` is added; CLI behavior verified against test fixtures. Command: `uv run python run.py --events data/events.jsonl --tenant T1 --order O-201 --question "Was this order paid?"`
+- CLI example: verified against `data/events.jsonl`. Command: `uv run python run.py --events data/events.jsonl --tenant T1 --order O-201 --question "Was this order paid?"`
 
 ## Module map
 ```
@@ -102,13 +102,13 @@ tests/
 - [x] M3: Notes isolation & evidence verifier
 - [x] M4: Tools & resilience
 - [x] M5: LangGraph & CLI
-- [ ] M6: Dataset & documentation scaffolding
+- [ ] M6: Dataset & documentation scaffolding (assumption inventory pending scope resolution)
 - [ ] M7: LLM mock & local tracer
 - [ ] M8: Quality gates
 - [ ] M9: P2 review (skipped per D2)
-- Current milestone: M6 (M1-M5 are complete).
-- Last session: 2026-11-07, completed M5 keyword intent classification, fixed LangGraph orchestration, verified template explanations, and an offline four-option CLI. Added O-201/O-216, four-intent invariance, notes-failure, essential-tool fallback, and CLI contract tests. Full suite: 94 passing; `ruff` and `mypy` clean.
-- Next action: Await user command "start M6" to build the 100+ event dataset and candidate-facing documentation scaffolding.
+- Current milestone: M6 (dataset and documentation drafts implemented; README assumption inventory remains incomplete).
+- Last session: 2026-11-07, built the 147-valid-record Section 17 dataset with all golden scenarios, six noise lines, README, and clearly marked candidate drafts. The M6 tests cover every Section 17 row and the documented CLI. Full suite: 121 passing; `ruff` and `mypy` clean. M6 is not checked off because PRD Section 9 requires assumptions from DataFlow Section 15 and PRD Section 10, which the user kept outside the M6 read allowlist.
+- Next action: Wait for an instruction that permits reading DataFlow Section 15 and PRD Section 10; then complete and verify the README assumption inventory before starting M7.
 - Decisions made and open questions: see `docs/DEV_LOG.md` and `docs/OPEN_QUESTIONS.md`.
 
 ## Working rules
