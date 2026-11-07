@@ -104,11 +104,11 @@ tests/
 - [x] M5: LangGraph & CLI
 - [x] M6: Dataset & documentation scaffolding (complete A1-A17 README inventory; candidate drafts retained)
 - [x] M7: LLM protocols, misbehaving mock, structured prompts, G5, local tracer, and import gate
-- [ ] M8: Quality gates
+- [x] M8: Quality gates (Ruff, mypy, pytest-cov, pip-audit)
 - [ ] M9: P2 review (skipped per D2)
-- Current milestone: M8 (quality gates).
-- Last session: 2026-11-07, completed M7 with a deterministic provider Protocol/mock, LLM-assisted closed-enum intent, structured prompts, G5 validation and safe fallback, redacted local JSONL tracing, and an AST architecture-import test. M7 tests cover misbehaving responses, two calls per run, trace redaction/run IDs, and all G1-G6 gates. Full suite: 136 passed; `ruff` and `mypy` clean. Pytest reports 13 third-party LangSmith deprecation warnings.
-- Next action: Start M8 using only its CLAUDE allowlist and verify the complete quality gates.
+- Current milestone: M9 (P2 review, skipped per D2).
+- Last session: 2026-11-07, completed M8 quality gates. `uv run ruff check .` and `uv run mypy src tests run.py` passed; `uv run pytest --cov=traceguard` passed 136 tests at 94% total coverage; `uv run pip-audit` found no known vulnerabilities and skipped the local `traceguard==0.1.0` package because it is not on PyPI. The test run reported 13 third-party LangSmith deprecation warnings.
+- Next action: Review M9's P2 omission against D2 and document that P2 remains intentionally skipped; do not add optional P2 packages.
 - Decisions made and open questions: see `docs/DEV_LOG.md` and `docs/OPEN_QUESTIONS.md`.
 
 ## Working rules
