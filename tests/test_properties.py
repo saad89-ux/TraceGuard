@@ -135,3 +135,36 @@ def test_property_tenant_isolation(other_amount: int) -> None:
     assert res_combined.anomalies == res_base.anomalies
     assert res_combined.evidence_event_ids == res_base.evidence_event_ids
     assert res_combined.confidence == res_base.confidence
+
+
+@given(st.text(min_size=1, max_size=200))
+def test_property_note_mutation(note_content: str) -> None:
+    """Property test: Adding, mutating, or editing a support note never alters financial state.
+
+    (status, captured_cents, refunded_cents, net_paid_cents, evidence_event_ids remain identical).
+    """
+    note_event = json.dumps({
+        "tenant_id": "T1",
+        "order_id": "O-201",
+        "event_id": "note-mutated",
+        "source": "support",
+        "type": "NOTE",
+        "occurred_at": "2026-11-01T10:00:00Z",
+        "ingested_at": "2026-11-01T10:00:05Z",
+        "text": note_content,
+    })
+    lines_with_note = list(BASE_EVENTS) + [note_event]
+
+    idx_base, quar_base = _build_index(BASE_EVENTS)
+    res_base = reconcile_order(idx_base, "T1", "O-201", quar_base)
+
+    idx_note, quar_note = _build_index(lines_with_note)
+    res_note = reconcile_order(idx_note, "T1", "O-201", quar_note)
+
+    # Financial results MUST remain identical
+    assert res_note.status == res_base.status
+    assert res_note.captured_cents == res_base.captured_cents
+    assert res_note.refunded_cents == res_base.refunded_cents
+    assert res_note.net_paid_cents == res_base.net_paid_cents
+    assert res_note.evidence_event_ids == res_base.evidence_event_ids
+    assert "note-mutated" not in res_note.evidence_event_ids

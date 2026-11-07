@@ -99,16 +99,16 @@ tests/
 ## Progress tracker
 - [x] M1: Ingest & validation (including configurable event-count and note-length caps)
 - [x] M2: Core reconcile & golden tests
-- [ ] M3: Notes isolation & evidence verifier
+- [x] M3: Notes isolation & evidence verifier
 - [ ] M4: Tools & resilience
 - [ ] M5: LangGraph & CLI
 - [ ] M6: Dataset & documentation scaffolding
 - [ ] M7: LLM mock & local tracer
 - [ ] M8: Quality gates
 - [ ] M9: P2 review (skipped per D2)
-- Current milestone: M3 (pre-existing uncommitted implementation/tests are present but not reviewed in this session; M1 and M2 are complete).
-- Last session: 2026-11-07, completed M1 input-cap gap: configurable event limit and note text truncation, with conservative defaults recorded in `docs/OPEN_QUESTIONS.md`. Full suite: 71 passing; `ruff` and `mypy` clean.
-- Next action: After the user says "start M3", review and complete the pre-existing M3 working-tree changes (notes isolation and evidence verifier).
+- Current milestone: M4 (not started; M1-M3 are complete, awaiting go-ahead).
+- Last session: 2026-11-07, completed M3 notes isolation and evidence verification. Added complete control-character sanitization, strict number and citation checks, injection warning verification, and safe anomaly wording. Full suite: 76 passing; `ruff` and `mypy` clean.
+- Next action: Await user command "start M4" to implement tools, resilience, and fault injection.
 - Decisions made and open questions: see `docs/DEV_LOG.md` and `docs/OPEN_QUESTIONS.md`.
 
 ## Working rules

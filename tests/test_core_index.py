@@ -27,6 +27,6 @@ def test_event_index_from_file_and_cache(tmp_path: Path) -> None:
     assert len(hash1) == 64
 
     # Second call should hit in-process cache with identical hash
-    idx2, quar2, hash2 = EventIndex.from_file(events_file)
+    idx2, _quar2, hash2 = EventIndex.from_file(events_file)
     assert hash2 == hash1
     assert idx2 is idx1
