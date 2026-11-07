@@ -42,9 +42,9 @@ TraceGuard is an offline-capable payment-dispute investigation service for e-com
 - Run tests: `uv run pytest` (verified)
 - Coverage: `uv run pytest --cov=traceguard` (verified)
 - Lint: `uv run ruff check .` (verified)
-- Type check: `uv run mypy src tests` (verified)
+- Type check: `uv run mypy src tests run.py` (verified)
 - Security audit: `uv run pip-audit` (verified)
-- CLI example: pending M5, when `run.py` and `data/events.jsonl` are added; command: `uv run python run.py --events data/events.jsonl --tenant T1 --order O-201 --question "Was this order paid?"`
+- CLI example: pending M6, when `data/events.jsonl` is added; CLI behavior verified against test fixtures. Command: `uv run python run.py --events data/events.jsonl --tenant T1 --order O-201 --question "Was this order paid?"`
 
 ## Module map
 ```
@@ -101,14 +101,14 @@ tests/
 - [x] M2: Core reconcile & golden tests
 - [x] M3: Notes isolation & evidence verifier
 - [x] M4: Tools & resilience
-- [ ] M5: LangGraph & CLI
+- [x] M5: LangGraph & CLI
 - [ ] M6: Dataset & documentation scaffolding
 - [ ] M7: LLM mock & local tracer
 - [ ] M8: Quality gates
 - [ ] M9: P2 review (skipped per D2)
-- Current milestone: M5 (M1-M4 are complete).
-- Last session: 2026-11-07, completed M4 tenant-scoped tools, bounded retry/timeout handling, fallback metadata, and scripted fault injection with A14 environment parsing. Full suite: 84 passing; `ruff` and `mypy` clean.
-- Next action: Await user command "start M5" to implement intent, template explanation, graph, and CLI.
+- Current milestone: M6 (M1-M5 are complete).
+- Last session: 2026-11-07, completed M5 keyword intent classification, fixed LangGraph orchestration, verified template explanations, and an offline four-option CLI. Added O-201/O-216, four-intent invariance, notes-failure, essential-tool fallback, and CLI contract tests. Full suite: 94 passing; `ruff` and `mypy` clean.
+- Next action: Await user command "start M6" to build the 100+ event dataset and candidate-facing documentation scaffolding.
 - Decisions made and open questions: see `docs/DEV_LOG.md` and `docs/OPEN_QUESTIONS.md`.
 
 ## Working rules
