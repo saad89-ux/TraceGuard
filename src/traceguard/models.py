@@ -26,6 +26,22 @@ class AnomalySeverity(str, Enum):
     INFO = "INFO"
 
 
+class OrderStatus(str, Enum):
+    PAID = "PAID"
+    UNPAID = "UNPAID"
+    PARTIALLY_PAID = "PARTIALLY_PAID"
+    PARTIALLY_REFUNDED = "PARTIALLY_REFUNDED"
+    REFUNDED = "REFUNDED"
+    DISPUTED = "DISPUTED"
+    UNKNOWN = "UNKNOWN"
+
+
+class ConfidenceLevel(str, Enum):
+    HIGH = "HIGH"
+    MEDIUM = "MEDIUM"
+    LOW = "LOW"
+
+
 class Event(BaseModel):
     """A fully validated event record."""
 
@@ -116,3 +132,18 @@ class QuarantinedRecord(BaseModel):
         if not self.is_attributable(tenant_id, order_id):
             return None
         return (self.to_anomaly_string(), self.anomaly_severity())
+
+
+class ReconResult(BaseModel):
+    """Deterministic financial reconciliation result produced by core only (Doc 1 Sec 8)."""
+
+    model_config = ConfigDict(frozen=True)
+
+    status: OrderStatus
+    captured_cents: int | None
+    refunded_cents: int | None
+    net_paid_cents: int | None
+    anomalies: list[str]
+    evidence_event_ids: list[str]
+    confidence: ConfidenceLevel
+    duplicate_count: int = 0

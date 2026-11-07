@@ -98,7 +98,7 @@ tests/
 
 ## Progress tracker
 - [x] M1: Ingest & validation
-- [ ] M2: Core reconcile & golden tests
+- [x] M2: Core reconcile & golden tests
 - [ ] M3: Notes isolation & evidence verifier
 - [ ] M4: Tools & resilience
 - [ ] M5: LangGraph & CLI
@@ -106,9 +106,9 @@ tests/
 - [ ] M7: LLM mock & local tracer
 - [ ] M8: Quality gates
 - [ ] M9: P2 review (skipped per D2)
-- Current milestone: M1 (complete, awaiting M2 go-ahead).
-- Last session: 2026-11-07, Milestone M1 completed (models, ingest validation, 8 ordered checks, quarantine, attribution). Tests: 35 passing (93% coverage). Quality gates clean (ruff, mypy, pip-audit).
-- Next action: Await user command "start M2" to implement M2 (core index, integrity, reconcile, confidence, golden tests).
+- Current milestone: M2 (complete, awaiting M3 go-ahead).
+- Last session: 2026-11-07, Milestone M2 completed (index, integrity engine, 8-step reconciler, confidence, golden cases O-201 to O-221, Hypothesis properties). Tests: 61 passing (98% coverage). Quality gates clean (ruff, mypy, pip-audit).
+- Next action: Await user command "start M3" to implement M3 (notes isolation, injection detector, evidence verifier).
 - Decisions made and open questions: see `docs/DEV_LOG.md` and `docs/OPEN_QUESTIONS.md`.
 
 ## Working rules
