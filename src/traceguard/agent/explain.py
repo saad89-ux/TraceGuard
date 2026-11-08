@@ -7,7 +7,7 @@ from traceguard.core.evidence_verifier import (
     verify_explanation,
 )
 from traceguard.core.notes import NotesChannel
-from traceguard.models import ExplainOutput, ReconResult
+from traceguard.models import Event, ExplainOutput, ReconResult
 
 
 def llm_explanation_is_valid(
@@ -39,6 +39,7 @@ def explain_result(
     allowed_numbers: set[int],
     expected_amount: int | None,
     currency: str | None,
+    events: list[Event] | None = None,
 ) -> str:
     """Build the template explanation and apply the G5 verifier before returning it."""
     text = build_template_explanation(
@@ -46,6 +47,7 @@ def explain_result(
         notes_channel=notes,
         expected_amount=expected_amount,
         currency=currency,
+        events=events,
     )
     verification = verify_explanation(
         text,
@@ -77,6 +79,7 @@ def explain_with_provider(
     allowed_numbers: set[int],
     expected_amount: int | None,
     currency: str | None,
+    events: list[Event] | None,
     provider: LLMProvider,
 ) -> tuple[str, bool]:
     """Use provider wording only after G5; return template text and rejection flag otherwise."""
@@ -87,6 +90,7 @@ def explain_with_provider(
         allowed_numbers=allowed_numbers,
         expected_amount=expected_amount,
         currency=currency,
+        events=events,
     )
     payload: dict[str, object] = {
         "status": result.status.value,

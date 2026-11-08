@@ -61,6 +61,7 @@ def reconcile_order(
     evidence_events = (
         [e for e in integ.clean_events if e.type.value == "ORDER_CREATED"]
         + integ.agreeing_capture_events
+        + integ.conflicting_events
         + integ.refunds
         + integ.failures
         + integ.chargebacks

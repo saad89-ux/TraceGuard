@@ -195,6 +195,23 @@ def test_o210_capture_id_reused_with_different_amounts() -> None:
     assert result.status == OrderStatus.UNKNOWN
     assert result.captured_cents is None
     assert any("TXN_ID_CONFLICT:c-dup" in a for a in result.anomalies)
+    assert result.evidence_event_ids == ["cap-1", "cap-2", "ord-1"]
+
+
+def test_cross_order_transaction_conflict_cites_in_scope_event() -> None:
+    lines = [
+        '{"tenant_id":"T1","order_id":"O-A","event_id":"ord-a","source":"checkout","type":"ORDER_CREATED","occurred_at":"2026-11-01T10:00:00Z","ingested_at":"2026-11-01T10:00:01Z","amount_cents":5000,"currency":"USD"}',
+        '{"tenant_id":"T1","order_id":"O-A","event_id":"pay-a","source":"payments","type":"PAYMENT_CAPTURED","occurred_at":"2026-11-01T10:01:00Z","ingested_at":"2026-11-01T10:01:01Z","capture_id":"shared","amount_cents":5000,"currency":"USD"}',
+        '{"tenant_id":"T1","order_id":"O-B","event_id":"ord-b","source":"checkout","type":"ORDER_CREATED","occurred_at":"2026-11-01T10:00:00Z","ingested_at":"2026-11-01T10:00:01Z","amount_cents":4000,"currency":"USD"}',
+        '{"tenant_id":"T1","order_id":"O-B","event_id":"pay-b","source":"payments","type":"PAYMENT_CAPTURED","occurred_at":"2026-11-01T10:01:00Z","ingested_at":"2026-11-01T10:01:01Z","capture_id":"shared","amount_cents":4000,"currency":"USD"}',
+    ]
+    index, quarantined = _build_index(lines)
+
+    result = reconcile_order(index, "T1", "O-A", quarantined)
+
+    assert result.status == OrderStatus.UNKNOWN
+    assert result.anomalies == ["TXN_ID_CONFLICT:shared"]
+    assert result.evidence_event_ids == ["ord-a", "pay-a"]
 
 
 def test_o211_same_event_id_different_amount() -> None:

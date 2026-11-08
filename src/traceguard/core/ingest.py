@@ -56,6 +56,10 @@ def _is_valid_iso8601(ts_str: str, *, require_timezone: bool = False) -> bool:
     """Validate an ISO 8601 timestamp, optionally requiring a timezone."""
     if not isinstance(ts_str, str) or not ts_str.strip():
         return False
+    if "T" not in ts_str.upper() and not (
+        len(ts_str) > 10 and ts_str[10] == " "
+    ):
+        return False
     try:
         # Python 3.11+ supports 'Z' and timezone offsets natively
         parsed = datetime.fromisoformat(ts_str)

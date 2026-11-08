@@ -9,7 +9,7 @@ from langgraph.graph.state import CompiledStateGraph
 
 from traceguard.adapters.llm_base import LLMProvider
 from traceguard.adapters.tracing import Tracer
-from traceguard.agent.explain import explain_with_provider
+from traceguard.agent.explain import explain_result, explain_with_provider
 from traceguard.agent.intent import Intent, classify_intent_with_provider
 from traceguard.agent.state import GraphState
 from traceguard.core.index import EventIndex
@@ -147,7 +147,13 @@ def _reconcile(state: GraphState) -> GraphState:
     notes_response = state["notes_response"]
     notes_channel = process_notes(notes_response.records)
     if order_response.unavailable or payment_response.unavailable:
-        failures = sorted(set(order_response.anomalies + payment_response.anomalies))
+        failures = sorted(
+            set(
+                order_response.anomalies
+                + payment_response.anomalies
+                + notes_response.anomalies
+            )
+        )
         result = ReconResult(
             status=OrderStatus.UNKNOWN,
             captured_cents=None,
@@ -215,11 +221,28 @@ def _explain(state: GraphState, provider: LLMProvider) -> GraphState:
         allowed_numbers=allowed_numbers,
         expected_amount=expected_amount if result.status != OrderStatus.UNKNOWN else None,
         currency=currency,
+        events=relevant,
         provider=provider,
     )
     if rejected:
         result = result.model_copy(
-            update={"anomalies": sorted(set(result.anomalies + ["LLM_OUTPUT_REJECTED"]))}
+            update={
+                "anomalies": sorted(set(result.anomalies + ["LLM_OUTPUT_REJECTED"])),
+                "confidence": (
+                    ConfidenceLevel.LOW
+                    if result.status == OrderStatus.UNKNOWN
+                    else ConfidenceLevel.MEDIUM
+                ),
+            }
+        )
+        explanation = explain_result(
+            result,
+            state["notes_channel"],
+            event_ids=event_ids,
+            allowed_numbers=allowed_numbers,
+            expected_amount=expected_amount if result.status != OrderStatus.UNKNOWN else None,
+            currency=currency,
+            events=relevant,
         )
     return {"explanation": explanation, "result": result}
 

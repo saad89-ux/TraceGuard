@@ -1,6 +1,6 @@
 # AI usage statement
 
-OpenAI Codex in the Codex desktop app was used as the coding assistant for this project work. It helped implement code and tests, diagnose test and static-check failures, and update project documentation. No other AI tools were used in the work recorded here.
+OpenAI Codex and GitHub Copilot were used as coding assistants for this project. Codex helped implement the initial application, tests, and documentation. GitHub Copilot performed a readiness audit, added strict model validation, corrected conflict evidence and combined-tool-failure reporting, improved event-level explanations, and verified the changes with tests and quality checks. No other AI tools were used in the work recorded here.
 
 ## Suggestions and corrections
 
@@ -9,4 +9,4 @@ OpenAI Codex in the Codex desktop app was used as the coding assistant for this 
 
 ## Authorship of this statement
 
-Codex drafted this statement and the responses in `DECISIONS.md` from the repository and development log at the user's request. The statement is intentionally explicit about that AI assistance; it does not claim that the candidate independently authored those drafts.
+Codex drafted this statement and the responses in `DECISIONS.md` from the repository and development log at the user's request. GitHub Copilot updated this statement to disclose its later implementation and verification work. The statement is intentionally explicit about that AI assistance; it does not claim that the candidate independently authored those drafts.

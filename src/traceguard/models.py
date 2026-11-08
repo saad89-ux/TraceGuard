@@ -3,7 +3,7 @@
 from enum import Enum
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, StrictInt
 
 
 class EventType(str, Enum):
@@ -84,7 +84,7 @@ class Event(BaseModel):
     attempt_id: str | None = None
     capture_id: str | None = None
     refund_id: str | None = None
-    amount_cents: int | None = None
+    amount_cents: StrictInt | None = None
     currency: str | None = None
     text: str | None = None
 

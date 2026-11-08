@@ -4,10 +4,12 @@ import json
 from pathlib import Path
 
 import pytest
+from pydantic import ValidationError
 
 from traceguard.core.ingest import ingest_events, parse_line
 from traceguard.models import (
     AnomalySeverity,
+    Event,
     EventType,
     QuarantinedRecord,
 )
@@ -151,6 +153,14 @@ def test_check_5_invalid_ingested_at() -> None:
     assert res.reason_code == "INVALID_TIMESTAMP"
 
 
+def test_check_5_ingested_at_requires_time_component() -> None:
+    data = json.loads(_valid_capture_line())
+    data["ingested_at"] = "2026-11-01"
+    res = parse_line(json.dumps(data), line_number=9)
+    assert isinstance(res, QuarantinedRecord)
+    assert res.reason_code == "INVALID_TIMESTAMP"
+
+
 # -------------------------------------------------------------------------
 # Test Check 6: MISSING_TXN_ID
 # -------------------------------------------------------------------------
@@ -201,6 +211,15 @@ def test_check_7_invalid_amounts(bad_amount: object) -> None:
     res = parse_line(json.dumps(data), line_number=12)
     assert isinstance(res, QuarantinedRecord)
     assert res.reason_code == "INVALID_AMOUNT"
+
+
+@pytest.mark.parametrize("bad_amount", [True, False, 129.5, "12900"])
+def test_event_model_rejects_non_integer_amounts(bad_amount: object) -> None:
+    data = json.loads(_valid_order_line())
+    data["amount_cents"] = bad_amount
+
+    with pytest.raises(ValidationError):
+        Event.model_validate(data)
 
 
 # -------------------------------------------------------------------------

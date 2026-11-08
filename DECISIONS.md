@@ -1,6 +1,6 @@
 # Decisions and tradeoffs
 
-These responses were prepared with OpenAI Codex from the implementation and development record. The accompanying [AI usage statement](AI_USAGE.md) describes that assistance.
+These responses were prepared with OpenAI Codex from the implementation and development record, then reviewed during a GitHub Copilot readiness pass. The accompanying [AI usage statement](AI_USAGE.md) describes both tools' contributions.
 
 ## 1. Most dangerous assumption
 

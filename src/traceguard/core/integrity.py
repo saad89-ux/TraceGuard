@@ -41,6 +41,7 @@ class IntegrityResult(NamedTuple):
     anomalies: list[AnomalyItem]
     duplicate_count: int
     agreeing_capture_events: list[Event]  # distinct events representing agreed captures
+    conflicting_events: list[Event]
 
 
 def check_integrity(
@@ -67,6 +68,7 @@ def check_integrity(
     # Check across tenant via identity_map to catch collisions across different orders
     seen_event_ids: set[str] = set()
     clean_events: list[Event] = []
+    conflicting_events: list[Event] = []
     duplicate_count = 0
 
     for ev in scoped_records:
@@ -88,6 +90,7 @@ def check_integrity(
                 anomalies.append(
                     AnomalyItem("EVENT_ID_CONFLICT", AnomalySeverity.FATAL, ref=ev.event_id)
                 )
+                conflicting_events.append(ev)
             else:
                 # Identical duplicates
                 duplicate_count += len(all_records_with_id) - 1
@@ -124,6 +127,7 @@ def check_integrity(
             anomalies.append(
                 AnomalyItem("TXN_ID_CONFLICT", AnomalySeverity.FATAL, ref=cap_id)
             )
+            conflicting_events.extend(cap_list)
         else:
             # Agreeing capture group: treat as one capture, count amount once
             unique_captures.append(cap_list[0])
@@ -146,6 +150,7 @@ def check_integrity(
             anomalies.append(
                 AnomalyItem("TXN_ID_CONFLICT", AnomalySeverity.FATAL, ref=ref_id)
             )
+            conflicting_events.extend(ref_list)
         else:
             unique_refunds.append(ref_list[0])
 
@@ -245,4 +250,5 @@ def check_integrity(
         anomalies=anomalies,
         duplicate_count=duplicate_count,
         agreeing_capture_events=agreeing_capture_events,
+        conflicting_events=conflicting_events,
     )

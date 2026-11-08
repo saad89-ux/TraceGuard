@@ -158,6 +158,8 @@ def test_o201_cli_workflow_matches_golden_and_prints_eight_fields(events_file: P
     assert (output["captured_cents"], output["refunded_cents"], output["net_paid_cents"]) == (12900, 0, 12900)
     assert output["evidence_event_ids"] == ["order-1", "pay-1", "pay-2"]
     assert output["confidence"] == "HIGH"
+    assert "Attempt A1 failed [pay-1]" in str(output["explanation"])
+    assert "Attempt A2 captured 12900 USD [pay-2]" in str(output["explanation"])
     assert completed.stdout.strip() == json.dumps(output, separators=(",", ":"))
     assert re.search(r"run_id=[0-9a-f-]{36}", completed.stderr)
 
@@ -224,7 +226,32 @@ def test_graph_rejects_misbehaving_explanation_without_changing_financial_state(
     assert output["evidence_event_ids"] == ["order-1", "pay-1", "pay-2"]
     assert output["anomalies"] == ["LLM_OUTPUT_REJECTED"]
     assert "Order expected 12900 USD" in str(output["explanation"])
+    assert "LLM_OUTPUT_REJECTED" in str(output["explanation"])
+    assert output["confidence"] == "MEDIUM"
     assert provider.calls == 2
+
+
+def test_template_cites_failure_capture_refund_and_chargeback_events(
+    tmp_path: Path,
+) -> None:
+    events = [
+        _event("ord-300", "ORDER_CREATED", "checkout", order="O-300", amount_cents=5000, currency="USD"),
+        _event("fail-300", "PAYMENT_FAILED", "payments", order="O-300", attempt_id="A1"),
+        _event("cap-300", "PAYMENT_CAPTURED", "payments", order="O-300", attempt_id="A2", capture_id="cap-300", amount_cents=5000, currency="USD"),
+        _event("ref-300", "REFUND_ISSUED", "payments", order="O-300", capture_id="cap-300", refund_id="ref-300", amount_cents=2000, currency="USD"),
+        _event("cb-300", "CHARGEBACK_OPENED", "payments", order="O-300", capture_id="cap-300"),
+    ]
+    path = tmp_path / "events.jsonl"
+    path.write_text("".join(json.dumps(event) + "\n" for event in events), encoding="utf-8")
+
+    result = _run_investigation(str(path), "T1", "O-300", "What evidence supports this status?")
+    explanation = str(result["explanation"])
+
+    assert result["status"] == "DISPUTED"
+    assert "Attempt A1 failed [fail-300]" in explanation
+    assert "Attempt A2 captured 5000 USD [cap-300]" in explanation
+    assert "Refund of 2000 USD issued [ref-300]" in explanation
+    assert "Chargeback opened [cb-300]" in explanation
 
 
 def test_notes_failure_keeps_financial_status_and_adds_warning(
@@ -252,6 +279,23 @@ def test_essential_tool_exhaustion_degrades_to_unknown(
     assert result["refunded_cents"] is None
     assert result["net_paid_cents"] is None
     assert result["anomalies"] == [f"TOOL_FAILURE:{tool_name}"]
+    assert result["confidence"] == "LOW"
+
+
+def test_notes_failure_is_reported_when_an_essential_tool_also_fails(
+    events_file: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv(
+        "TRACEGUARD_FAULTS",
+        "get_order=fail,fail,fail;get_support_notes=fail,fail,fail",
+    )
+
+    result = _run_investigation(
+        str(events_file), "T1", "O-201", "Was this order paid?"
+    )
+
+    assert result["status"] == "UNKNOWN"
+    assert result["anomalies"] == ["NOTES_UNAVAILABLE", "TOOL_FAILURE:get_order"]
     assert result["confidence"] == "LOW"
 
 

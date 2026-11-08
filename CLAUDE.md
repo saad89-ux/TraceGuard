@@ -107,8 +107,8 @@ tests/
 - [x] M8: Quality gates (Ruff, mypy, pytest-cov, pip-audit)
 - [x] M9: P2 review (skipped per D2; omission documented in README)
 - Current milestone: M1-M9 complete.
-- Last session: 2026-11-07, completed the project documentation at the user's explicit request. Replaced the candidate prompts with seven evidence-based decision responses and a candid AI usage statement disclosing Codex's implementation, testing, and drafting role. Updated the documentation acceptance test; full suite passed (136 tests, 94% coverage), Ruff and mypy were clean, and pip-audit found no known vulnerabilities (local package skipped because it is not on PyPI). Pytest reports 13 third-party LangSmith deprecation warnings. M9 remains complete: all P2 omissions are listed in README.
-- Next action: Submit the completed project using the assessment's submission channel.
+- Last session: 2026-11-07, completed a readiness pass without adding a real LLM provider or credentials. Enforced strict `Event.amount_cents`, timestamp shape, and anomaly evidence retention; preserved notes-tool diagnostics during essential-tool failure; completed event-specific explanations and G5 rejection reporting; added `.env.example` and updated truthful Codex/Copilot usage disclosure. Final suite: 145 passed, 94% coverage; Ruff and mypy clean; pip-audit found no known vulnerabilities (local package skipped because it is not on PyPI). Pytest reports 13 third-party LangSmith deprecation warnings.
+- Next action: Candidate reviews the final disclosures and submits the completed project using the assessment's submission channel.
 - Decisions made and open questions: see `docs/DEV_LOG.md` and `docs/OPEN_QUESTIONS.md`.
 
 ## Working rules

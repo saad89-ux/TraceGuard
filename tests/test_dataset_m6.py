@@ -163,3 +163,14 @@ def test_submission_documents_are_complete_and_disclose_codex_authorship() -> No
     assert "subprocess test" in ai_usage
     assert "architecture import test" in ai_usage
     assert "Codex drafted this statement" in ai_usage
+    assert "GitHub Copilot" in ai_usage
+
+
+def test_env_example_uses_offline_placeholders_only() -> None:
+    example_path = ROOT / ".env.example"
+    assert example_path.is_file()
+    example = example_path.read_text(encoding="utf-8")
+    assert "TRACEGUARD_LLM_PROVIDER=mock" in example
+    assert "TRACEGUARD_FAULTS=" in example
+    assert "sk-" not in example
+    assert "ghp_" not in example

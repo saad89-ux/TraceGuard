@@ -8,7 +8,7 @@ import re
 from pydantic import BaseModel, ConfigDict
 
 from traceguard.core.notes import NotesChannel
-from traceguard.models import OrderStatus, ReconResult
+from traceguard.models import Event, EventType, OrderStatus, ReconResult
 
 BRACKETED_ID_REGEX = re.compile(r"\[([^\[\]]*)\]")
 INTEGER_REGEX = re.compile(r"\b\d+\b")
@@ -80,6 +80,7 @@ def build_template_explanation(
     notes_channel: NotesChannel | None = None,
     expected_amount: int | None = None,
     currency: str | None = None,
+    events: list[Event] | None = None,
 ) -> str:
     """Construct the canonical deterministic explanation template (Doc 1 Sec 11).
 
@@ -88,8 +89,57 @@ def build_template_explanation(
     parts: list[str] = []
 
     curr_str = f" {currency}" if currency else ""
+    evidence_ids = set(result.evidence_event_ids)
+    evidence_events = {
+        event.event_id: event
+        for event in events or []
+        if event.event_id in evidence_ids and event.type != EventType.NOTE
+    }
     if expected_amount is not None:
-        parts.append(f"Order expected {expected_amount}{curr_str}.")
+        order_events = [
+            event
+            for event in evidence_events.values()
+            if event.type == EventType.ORDER_CREATED
+            and event.amount_cents == expected_amount
+        ]
+        if order_events:
+            for event in sorted(order_events, key=lambda item: item.event_id):
+                parts.append(
+                    f"Order expected {expected_amount}{curr_str} [{event.event_id}]."
+                )
+        else:
+            parts.append(f"Order expected {expected_amount}{curr_str}.")
+
+    for event in sorted(evidence_events.values(), key=lambda item: item.event_id):
+        event_currency = f" {event.currency}" if event.currency else curr_str
+        if event.type == EventType.PAYMENT_FAILED:
+            if event.attempt_id:
+                parts.append(f"Attempt {event.attempt_id} failed [{event.event_id}].")
+            else:
+                parts.append(f"Payment failed [{event.event_id}].")
+        elif event.type == EventType.PAYMENT_CAPTURED:
+            if event.amount_cents is not None and event.attempt_id:
+                parts.append(
+                    f"Attempt {event.attempt_id} captured {event.amount_cents}"
+                    f"{event_currency} [{event.event_id}]."
+                )
+            elif event.amount_cents is not None:
+                parts.append(
+                    f"Capture of {event.amount_cents}{event_currency}"
+                    f" recorded [{event.event_id}]."
+                )
+            else:
+                parts.append(f"Capture recorded [{event.event_id}].")
+        elif event.type == EventType.REFUND_ISSUED:
+            if event.amount_cents is not None:
+                parts.append(
+                    f"Refund of {event.amount_cents}{event_currency}"
+                    f" issued [{event.event_id}]."
+                )
+            else:
+                parts.append(f"Refund issued [{event.event_id}].")
+        elif event.type == EventType.CHARGEBACK_OPENED:
+            parts.append(f"Chargeback opened [{event.event_id}].")
 
     # Status-specific description
     if result.status == OrderStatus.PAID:
@@ -101,7 +151,7 @@ def build_template_explanation(
     elif result.status == OrderStatus.REFUNDED:
         parts.append(f"Payment was fully refunded {result.refunded_cents or 0}{curr_str}.")
     elif result.status == OrderStatus.PARTIALLY_REFUNDED:
-        parts.append(f"Payment was partially refunded {result.refunded_cents or 0}{curr_str}.")
+        parts.append(f"Refund total is {result.refunded_cents or 0}{curr_str}.")
     elif result.status == OrderStatus.DISPUTED:
         parts.append("A chargeback was opened on this order.")
     else:  # UNKNOWN
@@ -119,7 +169,10 @@ def build_template_explanation(
 
     # Net paid
     if result.net_paid_cents is not None:
-        parts.append(f"Net paid is {result.net_paid_cents}.")
+        if result.status == OrderStatus.PAID:
+            parts.append(f"Net paid is {result.net_paid_cents}.")
+        else:
+            parts.append(f"Net amount is {result.net_paid_cents}.")
 
     # Anomalies
     if result.anomalies:
