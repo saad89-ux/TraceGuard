@@ -1,6 +1,6 @@
 # AI usage statement
 
-OpenAI Codex and GitHub Copilot were used as coding assistants for this project. Codex helped implement the initial application, tests, and documentation. GitHub Copilot performed a readiness audit, added strict model validation, corrected conflict evidence and combined-tool-failure reporting, improved event-level explanations, and verified the changes with tests and quality checks. No other AI tools were used in the work recorded here.
+OpenAI Codex and GitHub Copilot were used as coding assistants for this project. Codex helped implement the initial application, tests, and documentation. GitHub Copilot performed a readiness audit, added strict model validation, corrected conflict evidence and combined-tool-failure reporting, improved event-level explanations, rewrote `DECISIONS.md` into concise discussion answers from the project record, and verified the changes with tests and quality checks. No other AI tools were used in the work recorded here.
 
 ## Suggestions and corrections
 
@@ -9,4 +9,4 @@ OpenAI Codex and GitHub Copilot were used as coding assistants for this project.
 
 ## Authorship of this statement
 
-Codex drafted this statement and the responses in `DECISIONS.md` from the repository and development log at the user's request. GitHub Copilot updated this statement to disclose its later implementation and verification work. The statement is intentionally explicit about that AI assistance; it does not claim that the candidate independently authored those drafts.
+Codex drafted this statement and the original responses in `DECISIONS.md` from the repository and development log at the user's request. GitHub Copilot later revised the decision answers for clarity and updated this statement to disclose that work. These documents disclose AI assistance and do not claim that the candidate independently authored the answers.
